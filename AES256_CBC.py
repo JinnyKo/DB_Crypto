@@ -46,4 +46,3 @@ print(f"Encrypted: {encrypted_data.hex()}")
 # 데이터 복호화
 decrypted_data = decrypt(encrypted_data, key)
 print(f"Decrypted: {decrypted_data}")
-S
