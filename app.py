@@ -1,15 +1,12 @@
 import streamlit as st
-import mysql.connector
-from utils import encrypt, decrypt, connect_db
+from db_utils import insert_card_info, get_card_info, get_all_card_info, initialize_db
 
-# MySQL 데이터베이스 연결 설정
-db = connect_db()
-cursor = db.cursor()
+# 데이터베이스 초기화
+initialize_db()
 
-# Streamlit 애플리케이션
 st.title("Card Information Management")
 
-menu = ["Add Card Info", "View Card Info"]
+menu = ["Add Card Info", "View Card Info", "View All Card Info"]
 choice = st.sidebar.selectbox("Menu", menu)
 
 if choice == "Add Card Info":
@@ -21,15 +18,7 @@ if choice == "Add Card Info":
     cvv = st.text_input("CVV")
 
     if st.button("Submit"):
-        encrypted_card_number = encrypt(card_number)
-        encrypted_card_holder_name = encrypt(card_holder_name)
-        encrypted_expiration_date = encrypt(expiration_date)
-        encrypted_cvv = encrypt(cvv)
-
-        sql = "INSERT INTO card_info (card_number, card_holder_name, expiration_date, cvv) VALUES (%s, %s, %s, %s)"
-        val = (encrypted_card_number, encrypted_card_holder_name, encrypted_expiration_date, encrypted_cvv)
-        cursor.execute(sql, val)
-        db.commit()
+        insert_card_info(card_number, card_holder_name, expiration_date, cvv)
         st.success("Card information added successfully!")
 
 elif choice == "View Card Info":
@@ -37,25 +26,43 @@ elif choice == "View Card Info":
     card_id = st.number_input("Enter Card ID", min_value=1)
 
     if st.button("View"):
-        sql = "SELECT card_number, card_holder_name, expiration_date, cvv FROM card_info WHERE id = %s"
-        val = (card_id,)
-        cursor.execute(sql, val)
-        result = cursor.fetchone()
-
-        if result:
-            encrypted_card_number, encrypted_card_holder_name, encrypted_expiration_date, encrypted_cvv = result
-            card_number = decrypt(encrypted_card_number)
-            card_holder_name = decrypt(encrypted_card_holder_name)
-            expiration_date = decrypt(encrypted_expiration_date)
-            cvv = decrypt(encrypted_cvv)
-
-            st.write("Card Number:", card_number)
-            st.write("Card Holder Name:", card_holder_name)
-            st.write("Expiration Date:", expiration_date)
-            st.write("CVV:", cvv)
+        card_info = get_card_info(card_id)
+        if card_info:
+            encrypted = card_info['encrypted']
+            decrypted = card_info['decrypted']
+            
+            st.write("### Encrypted Data")
+            st.write("Card Number (Encrypted):", encrypted['card_number'].hex())
+            st.write("Card Holder Name (Encrypted):", encrypted['card_holder_name'].hex())
+            st.write("Expiration Date (Encrypted):", encrypted['expiration_date'].hex())
+            st.write("CVV (Encrypted):", encrypted['cvv'].hex())
+            
+            st.write("### Decrypted Data")
+            st.write("Card Number:", decrypted['card_number'])
+            st.write("Card Holder Name:", decrypted['card_holder_name'])
+            st.write("Expiration Date:", decrypted['expiration_date'])
+            st.write("CVV:", decrypted['cvv'])
         else:
             st.error("Card not found")
 
-# 데이터베이스 연결 종료
-cursor.close()
-db.close()
+elif choice == "View All Card Info":
+    st.subheader("View All Card Information")
+    card_infos = get_all_card_info()
+    
+    for card_info in card_infos:
+        st.write(f"## Card ID: {card_info['id']}")
+        
+        encrypted = card_info['encrypted']
+        decrypted = card_info['decrypted']
+        
+        st.write("### Encrypted Data")
+        st.write("Card Number (Encrypted):", encrypted['card_number'].hex())
+        st.write("Card Holder Name (Encrypted):", encrypted['card_holder_name'].hex())
+        st.write("Expiration Date (Encrypted):", encrypted['expiration_date'].hex())
+        st.write("CVV (Encrypted):", encrypted['cvv'].hex())
+        
+        st.write("### Decrypted Data")
+        st.write("Card Number:", decrypted['card_number'])
+        st.write("Card Holder Name:", decrypted['card_holder_name'])
+        st.write("Expiration Date:", decrypted['expiration_date'])
+        st.write("CVV:", decrypted['cvv'])

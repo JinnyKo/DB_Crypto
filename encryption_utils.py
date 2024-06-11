@@ -1,4 +1,3 @@
-import mysql.connector
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
@@ -18,11 +17,3 @@ def decrypt(ct):
     cipher = AES.new(KEY, AES.MODE_CBC, iv)
     pt = unpad(cipher.decrypt(ct), AES.block_size)
     return pt.decode()
-
-def connect_db():
-    return mysql.connector.connect(
-        host="localhost",
-        user="your_username",
-        password="your_password",
-        database="card_company"
-    )
