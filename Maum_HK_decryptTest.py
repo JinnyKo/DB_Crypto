@@ -37,6 +37,9 @@ class AESCipher(object):
         # Jinny: OpenSSL명령어로 복호화된 값 설정 => openssl enc -seed -d -a -in {0} -pass file:{1} AES암호화 해제 명령 
         self.key = self.openssl_dec()
 
+        # 디버깅용 출력
+        print(f"Key from OpenSSL: {self.key}")
+
         # jinny: self.salt는 해시 생성할때 사용되는 솔트 값, 솔트값이 뭐냐면 관련된 키를 생성할 때 사용되는 추가 데이터인데 salt는 암호화나 해시 함수에 추가 해서
         #       같은 입력값이 주어지더라도 서로 다른 출력을 생성하도록 함, 그래서 동일한 비밀번호에 대해 항상 동일한 해시값이 생성되는 것을 방지
         self.salt = 'anySaltYouCanUse0f0n'  # 왜 랜덤이 아닌지 모르겠네 
