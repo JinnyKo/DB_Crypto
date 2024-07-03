@@ -89,7 +89,7 @@ def get_all_card_info():
     cursor.close()
     db.close()
 
-    card_infos = []
+    card_infos = [] 
     for result in results:
         card_id, encrypted_card_number, encrypted_card_holder_name, encrypted_expiration_date, encrypted_cvv = result
         card_number = decrypt(encrypted_card_number)
