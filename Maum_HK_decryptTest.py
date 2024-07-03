@@ -68,22 +68,22 @@ class AESCipher(object):
     def encrypt(self, message):
         message = self._pad(message)
         iv = Random.new().read(AES.block_size)
-        cipher = AES.new(self.private_key.encode('utf-8'), AES.MODE_CBC, iv)
+        cipher = AES.new(self.private_key, AES.MODE_CBC, iv)
         cipher_bytes = base64.b64encode(iv + cipher.encrypt(message.encode('utf-8')))
         return cipher_bytes.decode('utf-8')
 
     def decrypt(self, encoded):
         cipher_text = base64.b64decode(encoded)
         iv = cipher_text[:AES.block_size]
-        cipher = AES.new(self.private_key.encode('utf-8'), AES.MODE_CBC, iv)
+        cipher = AES.new(self.private_key, AES.MODE_CBC, iv)
         plain_bytes = self._unpad(cipher.decrypt(cipher_text[self.bs:]))
         return plain_bytes.decode('utf-8')
 
     # Jinny: 고정된 초기화 백터 사용해서 복호화 시키기 (보통은 각 암호화 작업마다 다른 IV 사용함, 보안성 안좋음)
     def decrypt_hk(self, encoded):
         cipher_text = base64.b64decode(encoded)
-        iv = self.private_key[:AES.block_size].encode('utf-8')
-        cipher = AES.new(self.private_key.encode('utf-8'), AES.MODE_CBC, iv)
+        iv = self.private_key[:AES.block_size]
+        cipher = AES.new(self.private_key, AES.MODE_CBC, iv)
         decrypted_text = self._unpad(cipher.decrypt(cipher_text))
         return decrypted_text.decode('utf-8')
 
